@@ -90,10 +90,10 @@ async function processNFT(tokenid) {
     try {
       const metadataRes = await fetch(httpURI);
       const metadata = await metadataRes.json();
-      name = metadata.name || `NFT #${tokenid}`;
+      name = metadata.name || `Steptract Genesis #${tokenid}`;
       image = metadata.image || httpURI;
     } catch {
-      name = `NFT #${tokenid}`;
+      name = `Steptract Genesis #${tokenid}`;
       image = httpURI;
     }
 
