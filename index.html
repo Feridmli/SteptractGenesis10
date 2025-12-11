@@ -18,6 +18,8 @@
       --os-subtext: #707a83;
       --os-blue: #2081E2;
       --os-blue-hover: #1868b7;
+      --os-green: #28a745; 
+      --os-green-hover: #218838;
       --os-orange: #ff6a00;
       --os-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
       --os-radius: 12px;
@@ -102,6 +104,12 @@
         border: 1px solid var(--os-border); 
         box-shadow: none;
     }
+    
+    .buy-btn-green {
+        background-color: var(--os-green);
+        box-shadow: 0 4px 10px rgba(40, 167, 69, 0.2);
+    }
+    .buy-btn-green:hover { background-color: var(--os-green-hover); }
 
     @media (max-width: 600px) {
         .navbar { padding: 0 15px; }
@@ -122,7 +130,6 @@
       padding-bottom: 120px;
     }
 
-    /* STATS BAR STYLES */
     .stats-container {
       display: flex;
       gap: 20px;
@@ -142,7 +149,6 @@
     .stat-label { font-size: 13px; color: var(--os-subtext); font-weight: 600; margin-bottom: 5px; text-transform: uppercase; }
     .stat-value { font-size: 20px; font-weight: 700; color: var(--os-text); }
     
-    /* SEARCH BAR & INFO */
     .controls-bar {
       display: flex;
       justify-content: space-between;
@@ -195,7 +201,7 @@
     }
 
     /* =========================================
-       5. NFT CARD DESIGN (NO IMAGE VERSION)
+       5. NFT CARD DESIGN
        ========================================= */
     .nft-card {
       background-color: var(--os-card);
@@ -207,7 +213,6 @@
       position: relative;
       display: flex;
       flex-direction: column;
-      /* Fixed height silindi, məzmuna görə dəyişəcək */
       min-height: 120px; 
     }
 
@@ -223,7 +228,7 @@
       flex-direction: column;
       gap: 10px;
       flex-grow: 1;
-      justify-content: center; /* Mərkəzləşdirmə */
+      justify-content: center;
     }
 
     .card-title {
@@ -251,16 +256,12 @@
       align-items: center;
     }
 
-    /* =========================================
-       6. ACTION BUTTONS
-       ========================================= */
-    /* Şəkil olmadığı üçün buttonları həmişə görünən edirik */
+    /* ACTION BUTTONS */
     .card-actions {
       margin-top: 10px;
       display: flex;
       gap: 8px;
       opacity: 1; 
-      transform: translateY(0);
       transition: all 0.25s ease;
     }
     
@@ -305,7 +306,7 @@
     }
     .nft-card:hover .select-box, .select-box:checked { display: block; }
 
-    /* SKELETON (Ölçü kiçildildi) */
+    /* SKELETON */
     .skeleton {
       background: #f0f2f5;
       background-image: linear-gradient(to right, #f0f2f5 0%, #ffffff 50%, #f0f2f5 100%);
@@ -313,11 +314,9 @@
       animation: shimmer 1.5s infinite linear; border: 1px solid var(--os-border);
     }
     @keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
-    
-    /* Şəkil yoxdur deyə hündürlüyü 140px etdik */
     .sk-card { height: 140px; border-radius: var(--os-radius); }
 
-    /* BULK BAR */
+    /* BULK BAR (DYNAMIC) */
     #bulkBar {
       position: fixed; bottom: 20px; left: 50%;
       transform: translateX(-50%) translateY(120px);
@@ -326,15 +325,17 @@
       box-shadow: 0 10px 40px rgba(0,0,0,0.12);
       display: flex; align-items: center; justify-content: space-between;
       gap: 20px; z-index: 2000; transition: transform 0.4s cubic-bezier(0.19, 1, 0.22, 1);
-      width: 90%; max-width: 600px;
+      width: 90%; max-width: 650px;
     }
     #bulkBar.active { transform: translateX(-50%) translateY(0); }
+    
     .bulk-input {
       background: white; border: 1px solid var(--os-border); color: var(--os-text);
       padding: 10px; border-radius: 8px; width: 120px; outline: none; font-weight: 500;
     }
     .bulk-input:focus { border-color: var(--os-blue); }
     .bulk-info { font-weight: 600; color: var(--os-text); font-size: 15px; }
+    
     .cancel-icon {
         background: none; border: none; color: #999; cursor: pointer; 
         font-size: 22px; padding: 0 5px; transition: color 0.2s;
@@ -394,9 +395,18 @@
 
   <div id="bulkBar">
     <div class="bulk-info" id="bulkCount">0 NFT seçildi</div>
+    
     <div style="display:flex; gap:10px; align-items:center;">
-        <input type="number" id="bulkPrice" placeholder="Qiymət (APE)" class="bulk-input" step="0.001">
-        <button class="wallet-btn" id="bulkListBtn" style="padding: 10px 30px;">Listələ</button>
+        
+        <div id="bulkListActions" style="display:flex; gap:10px;">
+            <input type="number" id="bulkPrice" placeholder="Qiymət (APE)" class="bulk-input" step="0.001">
+            <button class="wallet-btn" id="bulkListBtn" style="padding: 10px 30px;">Listələ</button>
+        </div>
+
+        <button class="wallet-btn buy-btn-green" id="bulkBuyBtn" style="display:none; padding: 10px 30px;">
+            Satın Al (<span id="bulkTotalPrice">0</span> APE)
+        </button>
+
         <button class="cancel-icon" onclick="cancelBulk()">✕</button>
     </div>
   </div>
