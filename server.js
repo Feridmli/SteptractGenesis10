@@ -28,13 +28,10 @@ app.use(express.static(distPath));
 // API ROUTES
 // =============================================
 
-// 1. STATISTIKA API (YENİ)
+// 1. STATISTIKA API
 app.get("/api/stats", async (req, res) => {
     try {
-        // Son 24 saatın timestamp-i
         const oneDayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
-
-        // Bütün orderləri gətiririk (real production üçün bunu SQL funksiyası ilə etmək daha yaxşıdır, amma indilik bu işləyəcək)
         const { data: allSales, error } = await supabase
             .from("orders")
             .select("price, createdat");
@@ -62,7 +59,7 @@ app.get("/api/stats", async (req, res) => {
 app.get("/api/nfts", async (req, res) => {
   const { data, error } = await supabase
     .from("metadata")
-    .select("*")
+    .select("*") // Bu last_sale_price sütununu da gətirəcək
     .order("tokenid", { ascending: true });
   if (error) return res.status(500).json({ error: error.message });
   res.json({ nfts: data });
@@ -73,11 +70,12 @@ app.post("/api/order", async (req, res) => {
   const { tokenid, price, seller_address, seaport_order, order_hash } = req.body;
   if (!tokenid || !seaport_order) return res.status(400).json({ error: "Missing data" });
 
+  // Listələmə zamanı last_sale_price dəyişmir, sadəcə yeni qiymət qoyulur
   const { error } = await supabase.from("metadata").upsert({
     tokenid: tokenid.toString(),
     price: price,
     seller_address: seller_address.toLowerCase(), 
-    buyer_address: null, // Listələnibsə, sahibi yoxdur (marketdədir)
+    buyer_address: null, 
     seaport_order: seaport_order,
     order_hash: order_hash,
     nft_contract: NFT_CONTRACT_ADDRESS,          
@@ -90,16 +88,17 @@ app.post("/api/order", async (req, res) => {
   res.json({ success: true });
 });
 
-// 4. BUY COMPLETE (YENİLƏNDİ - Volume üçün Orders cədvəlinə yazır)
+// 4. BUY COMPLETE (YENİLƏNDİ - last_sale_price LOGIC)
 app.post("/api/buy", async (req, res) => {
   const { tokenid, buyer_address, price, seller } = req.body;
   if (!tokenid || !buyer_address) return res.status(400).json({ error: "Missing buying data" });
 
-  // A. Metadata-nı yeniləyirik (sahibini dəyişirik)
+  // A. Metadata-nı yeniləyirik
   const { error: metaError } = await supabase.from("metadata").update({
     buyer_address: buyer_address.toLowerCase(),
     seller_address: null, 
-    price: 0,
+    price: 0,                   // Satışdan çıxarılır
+    last_sale_price: price,     // <--- YENİ: Satış qiyməti tarixçəyə yazılır
     seaport_order: null,
     order_hash: null,
     on_chain: true,
@@ -108,7 +107,7 @@ app.post("/api/buy", async (req, res) => {
 
   if (metaError) return res.status(500).json({ error: metaError.message });
 
-  // B. Orders cədvəlinə tarixçə yazırıq (Volume hesablamaq üçün)
+  // B. Orders cədvəlinə tarixçə yazırıq
   if (price && parseFloat(price) > 0) {
       await supabase.from("orders").insert({
           tokenid: tokenid.toString(),
