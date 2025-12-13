@@ -27,6 +27,7 @@ jobs:
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
           NFT_CONTRACT_ADDRESS: ${{ secrets.NFT_CONTRACT_ADDRESS }}
           APECHAIN_RPC: ${{ secrets.APECHAIN_RPC }}
+          SEAPORT_CONTRACT_ADDRESS: "0x0000000000000068f116a894984e2db1123eb395"
         run: |
           echo "🌐 Running NFT Metadata Sync"
           node syncNFTMetadata.js
