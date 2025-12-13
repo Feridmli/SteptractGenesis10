@@ -58,7 +58,7 @@ function convertIPFStoHTTP(uri) {
 }
 
 // =======================================================
-//   ⭐ UPDATED processNFT — LISTING TƏMİZLƏMƏ + SAHİBƏ BAXIŞ
+//   PROCESS NFT FUNCTION
 // =======================================================
 async function processNFT(tokenid) {
   try {
@@ -134,7 +134,7 @@ async function processNFT(tokenid) {
       name,
       image,
       updatedat: now,
-      createdat: now // upsert-də problem yaratmır
+      createdat: now 
     };
 
     // =============================
