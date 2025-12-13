@@ -139,7 +139,7 @@ function orderToJsonSafe(obj) {
 }
 
 // ==========================================
-// 3. FILTR LOGIKASI (YENI)
+// 3. FILTR LOGIKASI (YENILENMIS)
 // ==========================================
 
 // HTML-dən bu funksiyanı çağıracağıq (window obyektinə əlavə edirik)
@@ -162,10 +162,16 @@ function updateFilterCounts() {
 
     const total = allNFTs.length;
     const listed = allNFTs.filter(n => parseFloat(n.price) > 0).length;
-    // Satışda olmayan (qiyməti 0 olanlar)
-    const unlisted = allNFTs.filter(n => !parseFloat(n.price) || parseFloat(n.price) === 0).length;
+    
     // Satılmış (tarixçəsi olanlar)
     const sold = allNFTs.filter(n => parseFloat(n.last_sale_price) > 0).length;
+
+    // YENI MENTIQ: Satışda olmayan (qiyməti 0 VƏ son satışı 0 olanlar)
+    const unlisted = allNFTs.filter(n => {
+        const p = parseFloat(n.price || 0);
+        const ls = parseFloat(n.last_sale_price || 0);
+        return p === 0 && ls === 0;
+    }).length;
 
     countAllEl.textContent = total;
     countListedEl.textContent = listed;
@@ -189,7 +195,10 @@ function applyFilters() {
         const lastSale = parseFloat(nft.last_sale_price || 0);
 
         if (currentFilter === 'listed') return price > 0;
-        if (currentFilter === 'unlisted') return price === 0;
+        
+        // YENI MENTIQ: Satışda olmayan (qiyməti 0 VƏ son satışı 0)
+        if (currentFilter === 'unlisted') return price === 0 && lastSale === 0;
+        
         if (currentFilter === 'sold') return lastSale > 0;
         
         // 'all'
@@ -549,12 +558,15 @@ function refreshSingleCard(tokenid) {
 
     const oldCard = document.getElementById(`card-${tokenid}`);
     
-    // Əgər cari filtrə uyğun deyilsə (məsələn 'Listed' seçilib amma biz satışdan çıxardıq) kartı silirik
+    // YENI MENTIQ: Əgər cari filtrə uyğun deyilsə kartı silirik
     const price = parseFloat(nftData.price || 0);
     const lastSale = parseFloat(nftData.last_sale_price || 0);
     let shouldShow = true;
+    
     if (currentFilter === 'listed' && price === 0) shouldShow = false;
-    if (currentFilter === 'unlisted' && price > 0) shouldShow = false;
+    // Satışda olmayan (Unlisted): Price 0 VƏ LastSale 0 olmalıdır
+    if (currentFilter === 'unlisted' && (price > 0 || lastSale > 0)) shouldShow = false;
+    if (currentFilter === 'sold' && lastSale === 0) shouldShow = false;
     
     // Əgər gizlənməlidirsə
     if (!shouldShow && oldCard) {
